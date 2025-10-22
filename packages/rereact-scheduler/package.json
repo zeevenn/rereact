@@ -1,0 +1,32 @@
+{
+  "name": "rereact-scheduler",
+  "type": "module",
+  "version": "0.0.0",
+  "description": "_description_",
+  "author": "zeevenn <contract@ziven.me>",
+  "license": "MIT",
+  "homepage": "https://github.com/zeevenn/rereact/tree/main/packages/rereact-scheduler#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zeevenn/rereact.git",
+    "directory": "packages/rereact-scheduler"
+  },
+  "bugs": "https://github.com/zeevenn/rereact/issues",
+  "keywords": [],
+  "sideEffects": false,
+  "exports": {
+    ".": "./dist/index.mjs"
+  },
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "prepublishOnly": "tsdown",
+    "start": "tsx src/index.ts"
+  }
+}
