@@ -82,6 +82,8 @@ importers:
 
   packages/pkg-example: {}
 
+  packages/rereact: {}
+
 packages:
 
   '@antfu/eslint-config@6.0.0':
