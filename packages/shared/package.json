@@ -1,0 +1,24 @@
+{
+  "name": "shared",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared type and utils.",
+  "author": "Ziven <contact@ziven.me>",
+  "license": "MIT",
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "start": "tsx src/index.ts"
+  }
+}
