@@ -113,6 +113,9 @@ importers:
       react-dom:
         specifier: catalog:example
         version: 19.2.0(react@19.2.0)
+      rereact:
+        specifier: workspace:*
+        version: link:../packages/rereact
     devDependencies:
       '@types/node':
         specifier: catalog:types
