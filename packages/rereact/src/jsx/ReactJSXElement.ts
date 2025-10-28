@@ -56,6 +56,7 @@ function reactElement(type: any, key: string | null, props: any): ReactElement {
 
     type,
     key,
+    // React 后续会取消 element.ref 属性，统一使用 props.ref 代替
     ref,
 
     props,
