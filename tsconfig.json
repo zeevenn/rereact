@@ -8,11 +8,14 @@
       "rereact": ["./packages/rereact/src/index.ts"]
     },
     "resolveJsonModule": true,
+    "types": [],
     "strict": true,
     "strictNullChecks": true,
     "noEmit": true,
     "esModuleInterop": true,
     "skipDefaultLibCheck": true,
     "skipLibCheck": true
-  }
+  },
+  "include": ["packages/**/*.ts"],
+  "exclude": ["example", "node_modules"]
 }

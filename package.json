@@ -15,7 +15,7 @@
     "example:dev": "pnpm -C example dev",
     "example:build": "pnpm -C example build",
     "test": "vitest",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "pnpm -r --parallel typecheck",
     "prepare": "simple-git-hooks",
     "release": "changeset publish",
     "create:pkg": "tsx scripts/createPackage.ts"
