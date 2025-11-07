@@ -30,5 +30,8 @@
     "dev": "tsdown --watch",
     "prepublishOnly": "tsdown",
     "start": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "shared": "workspace:*"
   }
 }

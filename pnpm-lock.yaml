@@ -146,6 +146,12 @@ importers:
 
   packages/rereact-reconciler: {}
 
+  packages/rereact-reconciler-stack:
+    dependencies:
+      shared:
+        specifier: workspace:*
+        version: link:../shared
+
   packages/rereact-scheduler: {}
 
   packages/shared: {}
