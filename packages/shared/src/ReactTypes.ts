@@ -1,8 +1,6 @@
 import type { ReactElement } from './ReactElementType'
 
-// export type ReactNode = ReactElement | ReactFragment | ReactText | ReactPortal | ReactNull
-
-export type ReactNode = | ReactElement | ReactText | ReactFragment
+export type ReactNode = ReactElement | ReactText | ReactFragment
 
 export type ReactFragment = ReactEmpty | Iterable<ReactNode>
 

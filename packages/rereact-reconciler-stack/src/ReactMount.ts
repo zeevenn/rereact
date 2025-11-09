@@ -12,10 +12,14 @@ export type DOMElement = Element | DocumentFragment
  * render(<div>Hello, world!</div>, document.getElementById('root'))
  * ```
  */
-export function render(element: ReactElement, container: DOMElement): void {
-  const componentInstance = instantiateReactComponent(element)
+export function render(element: ReactElement, container: DOMElement): any {
+  // 1. 创建内部实例
+  const rootInstance = instantiateReactComponent(element)
 
-  container.appendChild(componentInstance.dom)
+  // 2. 挂载组件
+  const node = rootInstance.mountComponent()
+  container.replaceChildren(node)
 
-  return componentInstance
+  // 3. 返回公共实例（用户定义组件）
+  return rootInstance.getPublicInstance()
 }
