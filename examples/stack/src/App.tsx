@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
@@ -25,6 +25,9 @@ class App extends React.Component<{}, AppState> {
 
   render() {
     const { count, showEmpty } = this.state
+
+    // 取消注释下一行查看 `<!-- react-empty: 1 -->` 注释节点
+    return null
 
     return (
       <div>
