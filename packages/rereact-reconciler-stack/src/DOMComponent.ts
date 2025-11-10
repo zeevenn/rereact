@@ -10,7 +10,7 @@ import { instantiateReactComponent } from './instantiateReactComponent'
 /**
  * 保留属性（不应直接设置到 DOM 上）
  */
-const RESERVED_PROPS = new Set(['children', 'key', 'ref', 'dangerouslySetInnerHTML'])
+const RESERVED_PROPS = new Set(['children', 'dangerouslySetInnerHTML', 'suppressContentEditableWarning'])
 
 /**
  * 布尔属性（应该用 setAttribute/removeAttribute）
@@ -34,6 +34,8 @@ export class DOMComponent implements InternalInstance {
   private _hostNode: HTMLElement | null = null
   private _childInstances: InternalInstance[] = []
   private _tag: string
+  private _previousStyle: Record<string, string> | null = null
+  private _eventListeners: Map<string, EventListener> = new Map()
 
   constructor(element: ReactElement) {
     if (typeof element.type !== 'string') {
@@ -80,6 +82,7 @@ export class DOMComponent implements InternalInstance {
     // 如果 children 是数组，遍历处理每个子元素
     const childrenArray = Array.isArray(children) ? children : [children]
 
+    // 子项可以是 DOMComponent 或 CompositeComponent，取决于子元素的类型
     childrenArray.forEach((child) => {
       const childInstance = instantiateReactComponent(child)
       this._childInstances.push(childInstance)
@@ -94,53 +97,89 @@ export class DOMComponent implements InternalInstance {
   private _updateProperties(prevProps: any, nextProps: any): void {
     const node = this._hostNode!
 
-    // 移除旧属性
+    // 移除旧属性（只在属性不再存在于 nextProps 中，或值变成 null/undefined 时移除）
     Object.keys(prevProps).forEach((propName) => {
-      if (
-        RESERVED_PROPS.has(propName)
-        || propName in nextProps
-        || prevProps[propName] == null
-      ) {
+      if (RESERVED_PROPS.has(propName)) {
+        return
+      }
+
+      const prevValue = prevProps[propName]
+      const nextValue = nextProps[propName]
+
+      // 如果属性还在 nextProps 中且值不为 null，跳过移除（会在设置新属性时处理）
+      if (propName in nextProps && nextValue != null) {
+        return
+      }
+
+      // 如果 prevValue 本身就是 null/undefined，不需要移除
+      if (prevValue == null) {
         return
       }
 
       if (propName.startsWith('on')) {
-        // 移除事件监听器（简化：不处理）
+        // 移除事件监听器
+        this._removeEventListener(propName)
       }
       else if (propName === 'style') {
-        // 清空样式
+        // 清空所有样式
         node.removeAttribute('style')
+        this._previousStyle = null
       }
       else if (propName === 'className') {
         node.removeAttribute('class')
+      }
+      else if (BOOLEAN_ATTRIBUTES.has(propName)) {
+        node.removeAttribute(propName)
+      }
+      else if (propName === 'value' && (this._tag === 'input' || this._tag === 'textarea')) {
+        // value 属性特殊处理，不需要移除
       }
       else {
         node.removeAttribute(propName)
       }
     })
 
-    // 设置新属性
+    // 设置新属性（只设置值有变化的属性）
     Object.keys(nextProps).forEach((propName) => {
       if (RESERVED_PROPS.has(propName)) {
         return
       }
 
       const propValue = nextProps[propName]
+      const prevValue = prevProps[propName]
+
+      // 跳过值没有变化的属性
+      if (propValue === prevValue) {
+        return
+      }
+
+      // 如果新值是 null/undefined，跳过设置（已在移除旧属性时处理）
+      if (propValue == null && prevValue == null) {
+        return
+      }
 
       // 事件处理
       if (propName.startsWith('on')) {
-        const eventType = propName.toLowerCase().substring(2)
-        this._addEventListener(eventType, propValue)
+        // 先移除旧的事件监听器
+        this._removeEventListener(propName)
+        // 再添加新的事件监听器
+        if (propValue != null) {
+          const eventType = propName.toLowerCase().substring(2)
+          this._addEventListener(propName, eventType, propValue)
+        }
       }
       // className
       else if (propName === 'className') {
         if (propValue != null) {
           node.className = propValue
         }
+        else {
+          node.removeAttribute('class')
+        }
       }
       // style
       else if (propName === 'style') {
-        this._setStyle(propValue)
+        this._updateStyle(prevValue, propValue)
       }
       // 布尔属性
       else if (BOOLEAN_ATTRIBUTES.has(propName)) {
@@ -156,8 +195,11 @@ export class DOMComponent implements InternalInstance {
         if (this._tag === 'input' || this._tag === 'textarea') {
           (node as HTMLInputElement).value = propValue ?? ''
         }
+        else if (propValue != null) {
+          node.setAttribute(propName, String(propValue))
+        }
         else {
-          node.setAttribute(propName, propValue)
+          node.removeAttribute(propName)
         }
       }
       // 普通属性
@@ -168,32 +210,67 @@ export class DOMComponent implements InternalInstance {
   }
 
   /**
-   * 设置样式
+   * 更新样式（增量更新，只更新变化的样式属性）
    */
-  private _setStyle(styleObj: any): void {
-    if (!styleObj || typeof styleObj !== 'object')
-      return
-
+  private _updateStyle(prevStyle: any, nextStyle: any): void {
     const node = this._hostNode!
-    Object.keys(styleObj).forEach((styleName) => {
-      const styleValue = styleObj[styleName]
-      if (styleValue != null) {
+
+    // 如果新样式是 null/undefined，清空所有样式
+    if (!nextStyle || typeof nextStyle !== 'object') {
+      node.removeAttribute('style')
+      this._previousStyle = null
+      return
+    }
+
+    const prevStyleObj = this._previousStyle || {}
+
+    // 移除旧样式中不再存在的属性
+    Object.keys(prevStyleObj).forEach((styleName) => {
+      if (!(styleName in nextStyle) || nextStyle[styleName] == null) {
+        (node.style as any)[styleName] = ''
+      }
+    })
+
+    // 设置新样式或更新的样式
+    Object.keys(nextStyle).forEach((styleName) => {
+      const styleValue = nextStyle[styleName]
+      if (styleValue != null && styleValue !== prevStyleObj[styleName]) {
         // 直接使用驼峰命名设置样式
         (node.style as any)[styleName] = styleValue
       }
     })
+
+    // 保存当前样式副本（用于下次比较）
+    this._previousStyle = { ...nextStyle }
   }
 
   /**
    * 添加事件监听器
    */
-  private _addEventListener(eventType: string, handler: EventListener): void {
+  private _addEventListener(propName: string, eventType: string, handler: EventListener): void {
     if (!handler || typeof handler !== 'function')
       return
 
     const node = this._hostNode!
     // 简化：直接添加原生事件（未来可以改为合成事件）
     node.addEventListener(eventType, handler)
+    // 保存监听器引用，用于后续移除
+    this._eventListeners.set(propName, handler)
+  }
+
+  /**
+   * 移除事件监听器
+   */
+  private _removeEventListener(propName: string): void {
+    const handler = this._eventListeners.get(propName)
+    if (!handler) {
+      return
+    }
+
+    const node = this._hostNode!
+    const eventType = propName.toLowerCase().substring(2)
+    node.removeEventListener(eventType, handler)
+    this._eventListeners.delete(propName)
   }
 
   /**
@@ -242,11 +319,16 @@ export class DOMComponent implements InternalInstance {
     this._childInstances.forEach(instance => instance.unmountComponent())
     this._childInstances = []
 
-    // 移除所有事件监听器（简化：通过克隆节点）
-    // 注：实际应该记录所有事件并逐个移除
+    // 移除所有事件监听器
+    this._eventListeners.forEach((handler, propName) => {
+      const eventType = propName.toLowerCase().substring(2)
+      this._hostNode!.removeEventListener(eventType, handler)
+    })
+    this._eventListeners.clear()
 
     // 清理引用
     this._hostNode = null
+    this._previousStyle = null
   }
 
   /**

@@ -5,7 +5,7 @@ export type FunctionComponent = (props: any) => any
  */
 export interface ReactElement {
   /** 元素标识符，用于区分真实的 React 元素 */
-  $$typeof: symbol
+  $$typeof?: symbol
 
   /**
    * 元素类型：
