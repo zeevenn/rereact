@@ -1,8 +1,8 @@
-import type { ReactElement } from 'shared'
+import type { ReactNode } from 'shared'
 
 export interface InternalInstance {
   mountComponent: () => Node
-  receiveComponent: (nextElement: ReactElement) => void
+  receiveComponent: (nextElement: ReactNode) => void
   unmountComponent: () => void
 
   getPublicInstance: () => any

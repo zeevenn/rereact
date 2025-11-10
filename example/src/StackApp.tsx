@@ -8,7 +8,7 @@ import './App.css'
  */
 function StackApp() {
   return (
-    <>
+    <div>
       <div>
         <a href="https://vite.dev" target="_blank" rel="noreferrer">
           <img src={viteLogo} className="logo" alt="Vite logo" />
@@ -32,7 +32,7 @@ function StackApp() {
       <p className="read-the-docs">
         Testing function component support in Stack Reconciler
       </p>
-    </>
+    </div>
   )
 }
 

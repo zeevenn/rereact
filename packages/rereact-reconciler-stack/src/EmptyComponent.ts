@@ -3,6 +3,7 @@
  * 在 DOM 中创建一个注释节点作为占位符
  */
 
+import type { ReactNode } from 'shared'
 import type { InternalInstance } from './types/ReactInstance'
 
 let emptyIdCounter = 0
@@ -28,7 +29,7 @@ export class EmptyComponent implements InternalInstance {
   /**
    * 更新组件 - 空组件不需要更新
    */
-  receiveComponent(): void {
+  receiveComponent(_nextElement: ReactNode): void {
     // 空组件永远是空的，不需要任何操作
   }
 

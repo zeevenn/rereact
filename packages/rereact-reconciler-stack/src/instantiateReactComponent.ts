@@ -1,7 +1,9 @@
 import type { ReactElement, ReactNode } from 'shared'
 import type { InternalInstance } from './types/ReactInstance'
+import { CompositeComponent } from './CompositeComponent'
 import { DOMComponent } from './DOMComponent'
 import { EmptyComponent } from './EmptyComponent'
+import { TextComponent } from './TextComponent'
 
 export function instantiateReactComponent(node: ReactNode): InternalInstance {
   // 空节点 ReactEmpty: null | undefined | boolean
@@ -11,8 +13,7 @@ export function instantiateReactComponent(node: ReactNode): InternalInstance {
 
   // 文本节点 ReactText
   if (typeof node === 'string' || typeof node === 'number') {
-    // TODO: 实现 TextComponent
-    throw new TypeError('TextComponent not implemented yet')
+    return new TextComponent(node)
   }
 
   // ReactElement
@@ -24,13 +25,12 @@ export function instantiateReactComponent(node: ReactNode): InternalInstance {
     }
     else if (typeof element.type === 'function') {
       // 用户自定义组件，复合组件
-      // TODO: 实现 CompositeComponent
-      throw new TypeError('CompositeComponent not implemented yet')
+      return new CompositeComponent(element)
     }
     else if (typeof element.type === 'symbol') {
       // 特殊组件类型（Fragment, Portal 等）
       // TODO: 实现特殊组件
-      throw new TypeError('Special component types not implemented yet')
+      throw new TypeError(`Special component ${String(element.type)} not implemented yet`)
     }
   }
 

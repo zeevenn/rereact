@@ -3,7 +3,7 @@
  * 如 <div>, <span>, <button> 等
  */
 
-import type { ReactElement } from 'shared'
+import type { ReactElement, ReactNode } from 'shared'
 import type { InternalInstance } from './types/ReactInstance'
 import { instantiateReactComponent } from './instantiateReactComponent'
 
@@ -276,12 +276,18 @@ export class DOMComponent implements InternalInstance {
   /**
    * 更新组件
    */
-  receiveComponent(nextElement: ReactElement): void {
+  receiveComponent(nextElement: ReactNode): void {
+    // DOMComponent 只接受 ReactElement
+    if (typeof nextElement !== 'object' || nextElement == null) {
+      throw new TypeError('DOMComponent.receiveComponent expects ReactElement')
+    }
+
+    const nextElementTyped = nextElement as ReactElement
     const prevElement = this._currentElement
     const prevProps = prevElement.props
-    const nextProps = nextElement.props
+    const nextProps = nextElementTyped.props
 
-    this._currentElement = nextElement
+    this._currentElement = nextElementTyped
 
     // 更新属性
     this._updateProperties(prevProps, nextProps)
