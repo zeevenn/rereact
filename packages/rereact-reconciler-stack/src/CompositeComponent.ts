@@ -1,12 +1,13 @@
-import type { FunctionComponent, ReactElement, ReactNode } from 'shared'
+import type { ClassComponent, FunctionComponent, ReactElement, ReactNode } from 'shared'
 import type { InternalInstance } from './types/ReactInstance'
 import { instantiateReactComponent } from './instantiateReactComponent'
 
 /**
- * 复合组件 - 用于渲染用户自定义的函数组件
+ * 复合组件 - 用于渲染用户自定义的函数组件或类组件
  * 函数组件返回的元素会被递归处理，直到得到 DOM 节点
  */
 export class CompositeComponent implements InternalInstance {
+  private _publicInstance: any | null = null
   private _currentElement: ReactElement
   private _renderedElement: ReactNode | null = null
   private _renderedInstance: InternalInstance | null = null
@@ -20,18 +21,34 @@ export class CompositeComponent implements InternalInstance {
    */
   mountComponent(): Node {
     const { type, props } = this._currentElement
-    const FunctionComponent = type as FunctionComponent
 
-    // 调用函数组件获取渲染的元素
-    const renderedElement = FunctionComponent(props)
-    this._renderedElement = renderedElement
+    let publicInstance: any | null = null
+    let renderedElement: ReactNode | null = null
+    if (isClassComponent(type)) {
+      // 实例化组件类
+      publicInstance = new (type as ClassComponent)(props)
+      publicInstance.props = props
 
-    // 创建子实例并挂载
-    const renderedInstance = instantiateReactComponent(renderedElement)
-    this._renderedInstance = renderedInstance
+      // 调用 componentWillMount 生命周期方法
+      if (publicInstance.componentWillMount) {
+        publicInstance.componentWillMount()
+      }
 
-    // 递归挂载，直到得到 DOM 节点
-    return renderedInstance.mountComponent()
+      renderedElement = publicInstance.render()
+    }
+    else if (typeof type === 'function') {
+      // 函数组件(stateless component)
+      publicInstance = null
+      renderedElement = (type as FunctionComponent)(props)
+    }
+
+    // 保存公共实例
+    this._publicInstance = publicInstance
+
+    // 根据元素，实例化内部实例
+    this._renderedInstance = instantiateReactComponent(renderedElement)
+
+    return this._renderedInstance.mountComponent()
   }
 
   /**
@@ -100,10 +117,10 @@ export class CompositeComponent implements InternalInstance {
   }
 
   /**
-   * 获取公共实例 - 函数组件返回组件函数本身
+   * 获取公共实例
    */
-  getPublicInstance(): FunctionComponent {
-    return this._currentElement.type as FunctionComponent
+  getPublicInstance(): any {
+    return this._publicInstance
   }
 
   /**
@@ -112,4 +129,8 @@ export class CompositeComponent implements InternalInstance {
   getHostNode(): Node | null {
     return this._renderedInstance?.getHostNode() || null
   }
+}
+
+function isClassComponent(Component: any): boolean {
+  return !!(Component.prototype && Component.prototype.isReactComponent)
 }

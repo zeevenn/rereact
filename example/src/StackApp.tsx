@@ -1,12 +1,13 @@
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import React from 'react'
 
 /**
  * 函数组件示例 - 用于测试 Stack Reconciler 的函数组件支持
  * 注意：Stack Reconciler 只支持 stateless 函数组件，不支持 hooks
  */
-function StackApp() {
+function StackHeader() {
   return (
     <div>
       <div>
@@ -18,23 +19,35 @@ function StackApp() {
         </a>
       </div>
       <h1>Vite + React (Stack Reconciler)</h1>
-      <div className="card">
-        <button>
-          count is 0
-        </button>
-        <p>
-          This is a <strong>stateless function component</strong> using Stack Reconciler
-        </p>
-        <p>
-          Edit <code>src/StackApp.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Testing function component support in Stack Reconciler
-      </p>
     </div>
   )
 }
 
-export default StackApp
+export default class StackApp extends React.Component {
+  componentWillMount() {
+    console.log('StackClassComponentApp componentWillMount')
+  }
 
+  render() {
+    return (
+      <div>
+        <StackHeader />
+
+        <div className="card">
+          <button>
+            count is 0
+          </button>
+          <p>
+            This is a <strong>stateless function component</strong> using Stack Reconciler
+          </p>
+          <p>
+            Edit <code>src/StackApp.tsx</code> and save to test HMR
+          </p>
+        </div>
+        <p className="read-the-docs">
+          Testing function component support in Stack Reconciler
+        </p>
+      </div>
+    )
+  }
+}
