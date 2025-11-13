@@ -69,7 +69,7 @@ export class CompositeComponent implements InternalInstance {
 
     const publicInstance = this._publicInstance
     const prevRenderedInstance = this._renderedInstance
-    const prevRenderedElement = this.currentElement
+    const prevRenderedElement = prevRenderedInstance?.currentElement
 
     // 更新当前元素
     this.currentElement = nextElement as ReactElement
