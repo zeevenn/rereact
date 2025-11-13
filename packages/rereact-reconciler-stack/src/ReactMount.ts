@@ -38,11 +38,13 @@ export function render(element: ReactElement, container: DOMElement): any {
   // 1. 创建内部实例
   const rootInstance = instantiateReactComponent(element)
 
+  console.warn('rootInstance', rootInstance)
+
   // 2. 挂载组件
-  const node = rootInstance.mountComponent()
-  container.appendChild(node)
+  const nodeTree = rootInstance.mountComponent()
+  container.appendChild(nodeTree)
   // 保存对内部实例的引用
-  node._internalInstance = rootInstance
+  nodeTree._internalInstance = rootInstance
 
   // 3. 返回公共实例（用户定义组件）
   return rootInstance.getPublicInstance()
@@ -53,6 +55,7 @@ export function render(element: ReactElement, container: DOMElement): any {
  * @param container - DOM 容器
  */
 function unmount(container: DOMElement): void {
+  console.warn('[ReactMount] Unmounting')
   const firstChild = container.firstChild
   if (firstChild) {
     const rootInstance = firstChild._internalInstance

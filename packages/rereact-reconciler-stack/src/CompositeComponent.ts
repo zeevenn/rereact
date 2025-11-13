@@ -78,7 +78,7 @@ export class CompositeComponent implements InternalInstance {
     // 重新获取新的渲染元素
     let nextRenderedElement: ReactNode | null = null
     if (isClassComponent(type)) {
-      publicInstance.componentWillMount?.(nextProps)
+      publicInstance.componentWillUpdate?.(nextProps)
       // 更新 props
       publicInstance.props = nextProps
       // 重新渲染

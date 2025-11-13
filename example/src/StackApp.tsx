@@ -8,6 +8,8 @@ import React from 'react'
  * 注意：Stack Reconciler 只支持 stateless 函数组件，不支持 hooks
  */
 function StackHeader() {
+  console.log('StackHeader')
+
   return (
     <div>
       <div>
@@ -23,29 +25,84 @@ function StackHeader() {
   )
 }
 
-export default class StackApp extends React.Component {
+class StackCounter extends React.Component<{ count: number }> {
   componentWillMount() {
-    console.log('StackClassComponentApp componentWillMount')
+    console.log('StackCounter componentWillMount', this.props)
+  }
+
+  componentWillUpdate(nextProps: any) {
+    console.log('StackCounter componentWillUpdate', this.props, nextProps)
   }
 
   render() {
+    const { count } = this.props
+
+    return (
+      <div className="card">
+        <button id="increment-btn">
+          count is {count}
+        </button>
+        <button id="switch-mode-btn" style={{ marginLeft: '10px' }}>
+          Switch to List Mode
+        </button>
+        <p>
+          This demonstrates <strong>diff algorithm</strong> in Stack Reconciler
+        </p>
+        <p>
+          Click the button to update the counter. The DOM nodes are reused, not recreated!
+        </p>
+        <p>
+          Open DevTools console to see lifecycle methods being called.
+        </p>
+      </div>
+    )
+  }
+}
+
+function StackList() {
+  return (
+    <div className="card">
+      <button id="switch-mode-btn">
+        Switch to Counter Mode
+      </button>
+      <ul style={{ marginTop: '20px' }}>
+        <li>Item 1</li>
+        <li>Item 2</li>
+        <li>Item 3</li>
+      </ul>
+      <p>
+        This demonstrates switching between different component structures.
+      </p>
+      <p>
+        The diff algorithm will unmount and remount when structure changes.
+      </p>
+    </div>
+  )
+}
+
+export default class StackApp extends React.Component {
+  componentWillMount() {
+    console.log('StackApp componentWillMount')
+  }
+
+  componentWillUpdate(nextProps: any) {
+    console.log('StackApp componentWillUpdate', nextProps)
+  }
+
+  render() {
+    // 从全局状态读取（模拟 setState）
+    // 注意：我们的 Stack Reconciler 还没有实现 setState，所以使用全局状态
+    const state = (window as any).__stackAppState || { count: 0, mode: 'counter' }
+    const { count, mode } = state
+
     return (
       <div>
         <StackHeader />
 
-        <div className="card">
-          <button>
-            count is 0
-          </button>
-          <p>
-            This is a <strong>stateless function component</strong> using Stack Reconciler
-          </p>
-          <p>
-            Edit <code>src/StackApp.tsx</code> and save to test HMR
-          </p>
-        </div>
+        {mode === 'counter' ? <StackCounter count={count} /> : <StackList />}
+
         <p className="read-the-docs">
-          Testing function component support in Stack Reconciler
+          Testing diff algorithm and component updates in Stack Reconciler
         </p>
       </div>
     )

@@ -24,6 +24,7 @@ let textIdCounter = 0
 
 export class TextComponent implements InternalInstance {
   currentElement: string | number
+  _mountIndex?: number | null
   private _stringText: string
   private _hostNode: Text | null = null
   private _openingComment: Comment | null = null
@@ -34,6 +35,7 @@ export class TextComponent implements InternalInstance {
     this.currentElement = text
     this._stringText = String(text)
     this._domID = ++textIdCounter
+    this._mountIndex = 0
   }
 
   /**
