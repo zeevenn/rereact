@@ -7,20 +7,28 @@ import { instantiateReactComponent } from './instantiateReactComponent'
  * 函数组件返回的元素会被递归处理，直到得到 DOM 节点
  */
 export class CompositeComponent implements InternalInstance {
+  /**
+   * 公共实例(类组件实例或函数组件实例)
+   */
   private _publicInstance: any | null = null
-  private _currentElement: ReactElement
-  private _renderedElement: ReactNode | null = null
+  /**
+   * 当前 jsx 元素
+   */
+  currentElement: ReactElement
+  /**
+   * 渲染实例
+   */
   private _renderedInstance: InternalInstance | null = null
 
   constructor(element: ReactElement) {
-    this._currentElement = element
+    this.currentElement = element
   }
 
   /**
    * 挂载组件 - 调用函数组件并递归挂载渲染的元素
    */
   mountComponent(): Node {
-    const { type, props } = this._currentElement
+    const { type, props } = this.currentElement
 
     let publicInstance: any | null = null
     let renderedElement: ReactNode | null = null
@@ -59,15 +67,26 @@ export class CompositeComponent implements InternalInstance {
       throw new TypeError('CompositeComponent.receiveComponent expects ReactElement')
     }
 
-    const nextElementTyped = nextElement as ReactElement
-    this._currentElement = nextElementTyped
+    const publicInstance = this._publicInstance
+    const prevRenderedInstance = this._renderedInstance
+    const prevRenderedElement = this.currentElement
 
-    const { type, props } = nextElementTyped
-    const FunctionComponent = type as FunctionComponent
+    // 更新当前元素
+    this.currentElement = nextElement as ReactElement
+    const { type, props: nextProps } = nextElement as ReactElement
 
-    // 重新调用函数组件获取新的渲染元素
-    const nextRenderedElement = FunctionComponent(props)
-    const prevRenderedElement = this._renderedElement
+    // 重新获取新的渲染元素
+    let nextRenderedElement: ReactNode | null = null
+    if (isClassComponent(type)) {
+      publicInstance.componentWillMount?.(nextProps)
+      // 更新 props
+      publicInstance.props = nextProps
+      // 重新渲染
+      nextRenderedElement = publicInstance.render()
+    }
+    else if (typeof type === 'function') {
+      nextRenderedElement = (type as FunctionComponent)(nextProps)
+    }
 
     // 如果组件类型没有变化，尝试更新子组件
     if (
@@ -75,32 +94,37 @@ export class CompositeComponent implements InternalInstance {
       && nextRenderedElement != null
       && typeof prevRenderedElement === 'object'
       && typeof nextRenderedElement === 'object'
-      && this._renderedInstance
+      && prevRenderedInstance
     ) {
       const prevElement = prevRenderedElement as ReactElement
       const nextElement = nextRenderedElement as ReactElement
 
       // 如果渲染的元素类型相同，更新子组件（重用 DOM）
       if (prevElement.type === nextElement.type) {
-        this._renderedElement = nextRenderedElement
-        this._renderedInstance.receiveComponent(nextElement)
+        prevRenderedInstance.receiveComponent(nextElement)
         return
       }
     }
 
     // 类型不同，需要卸载旧实例并挂载新实例
-    // 注意：DOM 替换由父组件通过 _updateChildren 处理
-    if (this._renderedInstance) {
-      this._renderedInstance.unmountComponent()
-    }
+    // 查找旧节点，因为需要替换它
+    const prevNode = prevRenderedInstance?.getHostNode()
+
+    // 卸载旧实例
+    prevRenderedInstance?.unmountComponent()
 
     // 创建新实例并挂载
-    this._renderedElement = nextRenderedElement
-    const renderedInstance = instantiateReactComponent(nextRenderedElement)
-    this._renderedInstance = renderedInstance
+    const nextRenderedInstance = instantiateReactComponent(nextRenderedElement)
+    const nextNode = nextRenderedInstance.mountComponent()
+    this._renderedInstance = nextRenderedInstance
 
-    // 挂载新实例（DOM 节点会被父组件处理）
-    renderedInstance.mountComponent()
+    // 将旧节点替换为新节点
+    // 注意：这是 renderer 特定的代码，理想情况下应位于 CompositeComponent 之外
+    // 如果父组件是 DOMComponent，它会通过 _updateChildren 完全卸载和重新挂载
+    // 如果父组件是 CompositeComponent，我们需要自己处理 DOM 替换
+    if (prevNode && prevNode.parentNode) {
+      prevNode.parentNode.replaceChild(nextNode, prevNode)
+    }
   }
 
   /**
@@ -110,7 +134,6 @@ export class CompositeComponent implements InternalInstance {
     this._publicInstance?.componentWillUnmount?.()
     this._renderedInstance?.unmountComponent()
     this._publicInstance = null
-    this._renderedElement = null
     this._renderedInstance = null
   }
 

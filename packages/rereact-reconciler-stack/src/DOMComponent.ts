@@ -30,7 +30,7 @@ const BOOLEAN_ATTRIBUTES = new Set([
 ])
 
 export class DOMComponent implements InternalInstance {
-  private _currentElement: ReactElement
+  currentElement: ReactElement
   private _hostNode: HTMLElement | null = null
   private _childInstances: InternalInstance[] = []
   private _tag: string
@@ -41,7 +41,7 @@ export class DOMComponent implements InternalInstance {
     if (typeof element.type !== 'string') {
       throw new TypeError('DOMComponent expects element.type to be a string')
     }
-    this._currentElement = element
+    this.currentElement = element
     this._tag = element.type.toLowerCase()
   }
 
@@ -49,7 +49,7 @@ export class DOMComponent implements InternalInstance {
    * 挂载组件 - 创建 DOM 节点和子元素
    */
   mountComponent(): HTMLElement {
-    const { type, props } = this._currentElement
+    const { type, props } = this.currentElement
 
     // 创建 DOM 节点
     const node = document.createElement(type as string)
@@ -283,11 +283,11 @@ export class DOMComponent implements InternalInstance {
     }
 
     const nextElementTyped = nextElement as ReactElement
-    const prevElement = this._currentElement
+    const prevElement = this.currentElement
     const prevProps = prevElement.props
     const nextProps = nextElementTyped.props
 
-    this._currentElement = nextElementTyped
+    this.currentElement = nextElementTyped
 
     // 更新属性
     this._updateProperties(prevProps, nextProps)

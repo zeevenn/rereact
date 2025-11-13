@@ -2,12 +2,19 @@
  * 文本组件 - 用于渲染字符串和数字
  * 使用注释节点包裹文本节点，以便进行 reconciliation
  *
- * 参考 React 源码：ReactDOMTextComponent
- * 文本节点违反了一些 React 的假设：
- * - 挂载到 DOM 时，相邻的文本节点会被合并
- * - 文本节点不能分配 React root ID
+ * DOM 的默认行为：
+ * - 当相邻的文本节点之间没有元素节点时，浏览器可能会自动合并它们
+ * - 例如：<div>foo</div> 和 <div>bar</div> 如果相邻，文本节点可能被合并
  *
- * 因此使用注释节点包裹文本节点，使其能够进行 reconciliation
+ * React 的问题：
+ * - React 需要追踪每个文本节点，以便进行 reconciliation（协调更新）
+ * - 如果文本节点被合并，React 无法区分哪些文本对应哪些 React 元素
+ * - 无法正确更新或删除特定的文本节点
+ *
+ * 解决方案：
+ * - 使用注释节点包裹文本节点：<!-- react-text: 1 -->foo<!-- /react-text -->
+ * - 注释节点不会被合并，可以作为标记来追踪文本节点的位置
+ * - 即使文本节点被合并，注释节点仍然存在，可以用来定位和更新
  */
 
 import type { ReactNode } from 'shared'
@@ -16,7 +23,7 @@ import type { InternalInstance } from './types/ReactInstance'
 let textIdCounter = 0
 
 export class TextComponent implements InternalInstance {
-  private _currentElement: string | number
+  currentElement: string | number
   private _stringText: string
   private _hostNode: Text | null = null
   private _openingComment: Comment | null = null
@@ -24,7 +31,7 @@ export class TextComponent implements InternalInstance {
   private _domID: number
 
   constructor(text: string | number) {
-    this._currentElement = text
+    this.currentElement = text
     this._stringText = String(text)
     this._domID = ++textIdCounter
   }
@@ -66,8 +73,8 @@ export class TextComponent implements InternalInstance {
     }
 
     const nextText = nextElement
-    if (nextText !== this._currentElement) {
-      this._currentElement = nextText
+    if (nextText !== this.currentElement) {
+      this.currentElement = nextText
       const nextStringText = String(nextText)
 
       // 如果文本内容变化，更新文本节点

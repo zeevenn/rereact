@@ -14,6 +14,24 @@ export type DOMElement = Element | DocumentFragment
  */
 export function render(element: ReactElement, container: DOMElement): any {
   if (container.firstChild) {
+    const prevNode = container.firstChild
+    const prevInstance = prevNode._internalInstance
+    const prevElement = prevInstance?.currentElement
+
+    // 如果存在之前的实例且元素类型相同，重用组件
+    if (
+      prevInstance
+      && prevElement
+      && typeof prevElement === 'object'
+      && prevElement !== null
+      && 'type' in prevElement
+      && prevElement.type === element.type
+    ) {
+      prevInstance.receiveComponent(element)
+      return
+    }
+
+    // 否则卸载旧组件
     unmount(container)
   }
 

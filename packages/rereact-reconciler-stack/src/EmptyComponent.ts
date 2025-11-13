@@ -11,7 +11,7 @@ let emptyIdCounter = 0
 export class EmptyComponent implements InternalInstance {
   private _hostNode: Comment | null = null
   private _id: number
-  private _currentElement = null
+  currentElement = null
 
   constructor() {
     this._id = ++emptyIdCounter
