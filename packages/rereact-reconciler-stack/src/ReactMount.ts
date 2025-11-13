@@ -13,13 +13,34 @@ export type DOMElement = Element | DocumentFragment
  * ```
  */
 export function render(element: ReactElement, container: DOMElement): any {
+  if (container.firstChild) {
+    unmount(container)
+  }
+
   // 1. 创建内部实例
   const rootInstance = instantiateReactComponent(element)
 
   // 2. 挂载组件
   const node = rootInstance.mountComponent()
-  container.replaceChildren(node)
+  container.appendChild(node)
+  // 保存对内部实例的引用
+  node._internalInstance = rootInstance
 
   // 3. 返回公共实例（用户定义组件）
   return rootInstance.getPublicInstance()
+}
+
+/**
+ * 卸载组件
+ * @param container - DOM 容器
+ */
+function unmount(container: DOMElement): void {
+  const firstChild = container.firstChild
+  if (firstChild) {
+    const rootInstance = firstChild._internalInstance
+    if (rootInstance) {
+      rootInstance.unmountComponent()
+    }
+    container.replaceChildren()
+  }
 }

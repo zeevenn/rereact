@@ -30,9 +30,7 @@ export class CompositeComponent implements InternalInstance {
       publicInstance.props = props
 
       // 调用 componentWillMount 生命周期方法
-      if (publicInstance.componentWillMount) {
-        publicInstance.componentWillMount()
-      }
+      publicInstance.componentWillMount?.()
 
       renderedElement = publicInstance.render()
     }
@@ -109,11 +107,11 @@ export class CompositeComponent implements InternalInstance {
    * 卸载组件 - 递归卸载子组件
    */
   unmountComponent(): void {
-    if (this._renderedInstance) {
-      this._renderedInstance.unmountComponent()
-      this._renderedInstance = null
-    }
+    this._publicInstance?.componentWillUnmount?.()
+    this._renderedInstance?.unmountComponent()
+    this._publicInstance = null
     this._renderedElement = null
+    this._renderedInstance = null
   }
 
   /**
