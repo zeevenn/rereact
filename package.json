@@ -8,6 +8,7 @@
     "dev": "pnpm --filter './packages/**' -r --parallel dev",
     "lint": "eslint --cache .",
     "prepublishOnly": "pnpm build",
+    "postinstall": "pnpm build",
     "docs": "pnpm -C docs",
     "docs:dev": "pnpm -C docs run docs:dev",
     "docs:build": "pnpm -C docs run docs:build",
