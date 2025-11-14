@@ -28,7 +28,6 @@ function StackHeader() {
 class StackCounter extends React.Component<{
   count: number
   onIncrement: () => void
-  onSwitchMode: () => void
 }> {
   componentWillMount() {
     console.log('StackCounter componentWillMount', this.props)
@@ -39,7 +38,7 @@ class StackCounter extends React.Component<{
   }
 
   render() {
-    const { count, onIncrement, onSwitchMode } = this.props
+    const { count, onIncrement } = this.props
 
     return (
       <div className="card">
@@ -47,12 +46,6 @@ class StackCounter extends React.Component<{
           count is
           {' '}
           {count}
-        </button>
-        <button
-          onClick={onSwitchMode}
-          style={{ marginLeft: '10px' }}
-        >
-          Switch to List Mode
         </button>
         <p>
           This demonstrates
@@ -72,32 +65,8 @@ class StackCounter extends React.Component<{
   }
 }
 
-class StackList extends React.Component<{ onSwitchMode: () => void }> {
-  render() {
-    return (
-      <div className="card">
-        <button onClick={this.props.onSwitchMode}>
-          Switch to Counter Mode
-        </button>
-        <ul style={{ marginTop: '20px' }}>
-          <li>Item 1</li>
-          <li>Item 2</li>
-          <li>Item 3</li>
-        </ul>
-        <p>
-          This demonstrates switching between different component structures.
-        </p>
-        <p>
-          The diff algorithm will unmount and remount when structure changes.
-        </p>
-      </div>
-    )
-  }
-}
-
 interface StackAppState {
   count: number
-  mode: 'counter' | 'list'
 }
 
 export default class StackApp extends React.Component<object, StackAppState> {
@@ -105,7 +74,6 @@ export default class StackApp extends React.Component<object, StackAppState> {
     super(props)
     this.state = {
       count: 0,
-      mode: 'counter',
     }
   }
 
@@ -124,30 +92,17 @@ export default class StackApp extends React.Component<object, StackAppState> {
     }))
   }
 
-  handleSwitchToList = () => {
-    this.setState({ mode: 'list' })
-  }
-
-  handleSwitchToCounter = () => {
-    this.setState({ mode: 'counter' })
-  }
-
   render() {
-    const { count, mode } = this.state
+    const { count } = this.state
 
     return (
       <div>
         <StackHeader />
 
-        {mode === 'counter'
-          ? (
-              <StackCounter
-                count={count}
-                onIncrement={this.handleIncrement}
-                onSwitchMode={this.handleSwitchToList}
-              />
-            )
-          : <StackList onSwitchMode={this.handleSwitchToCounter} />}
+        <StackCounter
+          count={count}
+          onIncrement={this.handleIncrement}
+        />
 
         <p className="read-the-docs">
           Testing diff algorithm and component updates in Stack Reconciler
