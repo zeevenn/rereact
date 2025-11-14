@@ -1,0 +1,40 @@
+{
+  "name": "rereact-reconciler-stack",
+  "type": "module",
+  "version": "0.0.0",
+  "private": false,
+  "description": "Stack reconciler in v15.",
+  "author": "Ziven <contact@ziven.me>",
+  "license": "MIT",
+  "homepage": "https://github.com/zeevenn/rereact/tree/main/packages/rereact-reconciler-stack#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zeevenn/rereact.git",
+    "directory": "packages/rereact-reconciler-stack"
+  },
+  "bugs": "https://github.com/zeevenn/rereact/issues",
+  "keywords": [],
+  "sideEffects": false,
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "prepublishOnly": "tsdown",
+    "start": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "shared": "workspace:*"
+  },
+  "devDependencies": {
+    "rereact": "workspace:*"
+  }
+}

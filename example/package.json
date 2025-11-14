@@ -12,7 +12,8 @@
   "dependencies": {
     "react": "catalog:example",
     "react-dom": "catalog:example",
-    "rereact": "workspace:*"
+    "rereact": "workspace:*",
+    "rereact-reconciler-stack": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:types",
