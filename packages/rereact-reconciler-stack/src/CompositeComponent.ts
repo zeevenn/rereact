@@ -34,8 +34,21 @@ export class CompositeComponent implements InternalInstance {
     let renderedElement: ReactNode | null = null
     if (isClassComponent(type)) {
       // 实例化组件类
+      // 注意：如果组件在 constructor 中初始化了 state（如 this.state = { count: 0 }），
+      // 那么 state 已经在实例化时设置了
       publicInstance = new (type as ClassComponent)(props)
       publicInstance.props = props
+
+      // 如果组件没有在 constructor 中初始化 state，则设置为空对象
+      // 这确保了 setState 方法可以正常工作
+      if (!publicInstance.state) {
+        publicInstance.state = {}
+      }
+
+      // 实现 setState 方法
+      publicInstance.setState = (partialState: any, callback?: () => void) => {
+        this._updateState(partialState, callback)
+      }
 
       // 调用 componentWillMount 生命周期方法
       publicInstance.componentWillMount?.()
@@ -68,12 +81,10 @@ export class CompositeComponent implements InternalInstance {
     }
 
     const publicInstance = this._publicInstance
-    const prevRenderedInstance = this._renderedInstance
-    const prevRenderedElement = prevRenderedInstance?.currentElement
+    const { type, props: nextProps } = nextElement as ReactElement
 
     // 更新当前元素
     this.currentElement = nextElement as ReactElement
-    const { type, props: nextProps } = nextElement as ReactElement
 
     // 重新获取新的渲染元素
     let nextRenderedElement: ReactNode | null = null
@@ -88,7 +99,50 @@ export class CompositeComponent implements InternalInstance {
       nextRenderedElement = (type as FunctionComponent)(nextProps)
     }
 
-    // 如果组件类型没有变化，尝试更新子组件
+    // 更新渲染实例
+    this._updateRenderedComponent(nextRenderedElement)
+  }
+
+  /**
+   * 更新组件状态（setState 的内部实现）
+   */
+  private _updateState(partialState: any, callback?: () => void): void {
+    const publicInstance = this._publicInstance
+    if (!publicInstance) {
+      return
+    }
+
+    // 合并状态
+    const prevState = publicInstance.state || {}
+    const nextState = typeof partialState === 'function'
+      ? partialState(prevState)
+      : { ...prevState, ...partialState }
+
+    publicInstance.state = nextState
+
+    // 调用 componentWillUpdate（但 props 没变，只是 state 变了）
+    publicInstance.componentWillUpdate?.(publicInstance.props)
+
+    // 重新渲染获取新的 renderedElement
+    const nextRenderedElement = publicInstance.render()
+
+    // 更新渲染实例
+    this._updateRenderedComponent(nextRenderedElement, callback)
+  }
+
+  /**
+   * 更新渲染实例 - 比较新旧渲染元素，决定是更新还是替换
+   * @param nextRenderedElement - 新的渲染元素
+   * @param callback - 更新完成后的回调（用于 setState）
+   */
+  private _updateRenderedComponent(
+    nextRenderedElement: ReactNode,
+    callback?: () => void,
+  ): void {
+    const prevRenderedInstance = this._renderedInstance
+    const prevRenderedElement = prevRenderedInstance?.currentElement
+
+    // 如果组件类型没有变化，尝试更新子组件（重用 DOM）
     if (
       prevRenderedElement != null
       && nextRenderedElement != null
@@ -102,12 +156,12 @@ export class CompositeComponent implements InternalInstance {
       // 如果渲染的元素类型相同，更新子组件（重用 DOM）
       if (prevElement.type === nextElement.type) {
         prevRenderedInstance.receiveComponent(nextElement)
+        callback?.()
         return
       }
     }
 
     // 类型不同，需要卸载旧实例并挂载新实例
-    // 查找旧节点，因为需要替换它
     const prevNode = prevRenderedInstance?.getHostNode()
 
     // 卸载旧实例
@@ -125,6 +179,9 @@ export class CompositeComponent implements InternalInstance {
     if (prevNode && prevNode.parentNode) {
       prevNode.parentNode.replaceChild(nextNode, prevNode)
     }
+
+    // 调用回调
+    callback?.()
   }
 
   /**
