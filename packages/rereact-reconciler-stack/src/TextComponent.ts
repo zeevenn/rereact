@@ -7,7 +7,7 @@
  * - 例如：<div>foo</div> 和 <div>bar</div> 如果相邻，文本节点可能被合并
  *
  * React 的问题：
- * - React 需要追踪每个文本节点，以便进行 reconciliation（协调更新）
+ * - React 需要追踪每个文本节点，以便进行 reconciliation（调和更新）
  * - 如果文本节点被合并，React 无法区分哪些文本对应哪些 React 元素
  * - 无法正确更新或删除特定的文本节点
  *

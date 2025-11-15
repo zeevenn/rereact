@@ -338,7 +338,7 @@ export class DOMComponent implements InternalInstance {
   }
 
   /**
-   * 更新子元素（完整 diff 算法）
+   * 更新子元素
    */
   private _updateChildren(prevChildren: any, nextChildren: any): void {
     const CONTENT_TYPES: Record<string, boolean> = { string: true, number: true }
@@ -392,7 +392,7 @@ export class DOMComponent implements InternalInstance {
     const removedNodes: Record<string, Node> = {}
     const mountImages: any[] = []
 
-    // 1. 调用协调器进行 diff（真正的 diff 算法）
+    // 1. 调用调和器进行 diff
     const nextChildInstances = this._reconcilerUpdateChildren(
       this._renderedChildren,
       nextChildrenFlattened,
@@ -465,7 +465,7 @@ export class DOMComponent implements InternalInstance {
   }
 
   /**
-   * 协调器更新子组件（真正的 diff 算法）
+   * 调和器更新子组件
    */
   private _reconcilerUpdateChildren(
     prevChildren: Record<string, InternalInstance> | null,
