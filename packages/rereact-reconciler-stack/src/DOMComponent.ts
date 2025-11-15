@@ -47,7 +47,10 @@ interface Update {
 export class DOMComponent implements InternalInstance {
   currentElement: ReactElement
   private _hostNode: HTMLElement | null = null
-  private _renderedChildren: Record<string, InternalInstance> | null = null // 改为对象，key -> instance
+  /**
+   * 已渲染的子组件实例，key -> instance
+   */
+  private _renderedChildInstances: Record<string, InternalInstance> | null = null
   private _tag: string
   private _previousStyle: Record<string, string> | null = null
   private _eventListeners: Map<string, EventListener> = new Map()
@@ -128,7 +131,7 @@ export class DOMComponent implements InternalInstance {
       mountImages.push(mountImage)
     }
 
-    this._renderedChildren = childInstances
+    this._renderedChildInstances = childInstances
     return mountImages
   }
 
@@ -361,7 +364,7 @@ export class DOMComponent implements InternalInstance {
       // 文本内容：如果之前也是文本内容，尝试更新现有的 TextComponent
       if (prevContent != null) {
         // 之前也是文本内容，尝试更新现有的 TextComponent
-        const existingTextInstance = this._renderedChildren?.['.0']
+        const existingTextInstance = this._renderedChildInstances?.['.0']
         if (existingTextInstance && existingTextInstance instanceof TextComponent) {
           // 更新现有的 TextComponent
           existingTextInstance.receiveComponent(`${nextContent}`)
@@ -378,29 +381,28 @@ export class DOMComponent implements InternalInstance {
     }
     else if (nextChildrenElements != null) {
       // React 元素：执行 diff 算法
-      this._updateChildrenElements(prevChildrenElements, nextChildrenElements)
+      this._updateChildrenElements(nextChildrenElements)
     }
   }
 
   /**
    * 更新 React 元素子节点（核心 diff 算法）
    */
-  private _updateChildrenElements(prevChildren: any, nextChildren: any): void {
-    const _prevChildrenFlattened = prevChildren != null ? this._flattenChildren(prevChildren) : null
-    const nextChildrenFlattened = nextChildren != null ? this._flattenChildren(nextChildren) : null
+  private _updateChildrenElements(nextChildElements: any): void {
+    const nextChildElementsFlattened = nextChildElements != null ? this._flattenChildren(nextChildElements) : null
 
     const removedNodes: Record<string, Node> = {}
     const mountImages: any[] = []
 
     // 1. 调用调和器进行 diff
     const nextChildInstances = this._reconcilerUpdateChildren(
-      this._renderedChildren,
-      nextChildrenFlattened,
+      this._renderedChildInstances,
+      nextChildElementsFlattened,
       mountImages,
       removedNodes,
     )
 
-    if (!nextChildInstances && !this._renderedChildren) {
+    if (!nextChildInstances && !this._renderedChildInstances) {
       return
     }
 
@@ -413,25 +415,25 @@ export class DOMComponent implements InternalInstance {
 
     // 遍历新的子组件，生成移动/插入操作
     for (const key in nextChildInstances) {
-      const prevChild = this._renderedChildren?.[key]
-      const nextChild = nextChildInstances[key]
+      const prevChildInstance = this._renderedChildInstances?.[key]
+      const nextChildInstance = nextChildInstances[key]
 
-      if (prevChild === nextChild) {
+      if (prevChildInstance === nextChildInstance) {
         // 相同组件：可能需要移动
-        const update = this._moveChild(prevChild, lastPlacedNode, nextIndex, lastIndex)
+        const update = this._moveChild(prevChildInstance, lastPlacedNode, nextIndex, lastIndex)
         if (update) {
           updates.push(update)
         }
-        lastIndex = Math.max(prevChild._mountIndex ?? 0, lastIndex)
-        prevChild._mountIndex = nextIndex
+        lastIndex = Math.max(prevChildInstance._mountIndex ?? 0, lastIndex)
+        prevChildInstance._mountIndex = nextIndex
       }
       else {
         // 不同组件：需要插入
-        if (prevChild) {
-          lastIndex = Math.max(prevChild._mountIndex ?? 0, lastIndex)
+        if (prevChildInstance) {
+          lastIndex = Math.max(prevChildInstance._mountIndex ?? 0, lastIndex)
         }
         const update = this._mountChildAtIndex(
-          nextChild,
+          nextChildInstance,
           mountImages[nextMountIndex],
           lastPlacedNode,
           nextIndex,
@@ -442,14 +444,14 @@ export class DOMComponent implements InternalInstance {
         nextMountIndex++
       }
       nextIndex++
-      lastPlacedNode = this._getHostNodeFromInstance(nextChild)
+      lastPlacedNode = this._getHostNodeFromInstance(nextChildInstance)
     }
 
     // 3. 处理删除的节点
     for (const key in removedNodes) {
-      const prevChild = this._renderedChildren?.[key]
-      if (prevChild) {
-        const update = this._unmountChild(prevChild, removedNodes[key])
+      const prevChildInstance = this._renderedChildInstances?.[key]
+      if (prevChildInstance) {
+        const update = this._unmountChild(prevChildInstance, removedNodes[key])
         if (update) {
           updates.push(update)
         }
@@ -461,44 +463,44 @@ export class DOMComponent implements InternalInstance {
       this._processUpdateQueue(updates)
     }
 
-    this._renderedChildren = nextChildInstances
+    this._renderedChildInstances = nextChildInstances
   }
 
   /**
    * 调和器更新子组件
    */
   private _reconcilerUpdateChildren(
-    prevChildren: Record<string, InternalInstance> | null,
-    nextChildrenFlattened: Record<string, ReactNode> | null,
+    prevChildInstances: Record<string, InternalInstance> | null,
+    nextChildElementsFlattened: Record<string, ReactNode> | null,
     mountImages: any[],
     removedNodes: Record<string, Node>,
   ): Record<string, InternalInstance> | null {
-    if (!nextChildrenFlattened && !prevChildren) {
+    if (!nextChildElementsFlattened && !prevChildInstances) {
       return null
     }
 
     const nextChildInstances: Record<string, InternalInstance> = {}
 
     // 遍历新的子元素
-    for (const key in nextChildrenFlattened) {
-      const prevChild = prevChildren?.[key]
-      const prevElement = prevChild?.currentElement
-      const nextElement = nextChildrenFlattened[key]
+    for (const key in nextChildElementsFlattened) {
+      const prevChildInstance = prevChildInstances?.[key]
+      const prevElement = prevChildInstance?.currentElement
+      const nextElement = nextChildElementsFlattened[key]
 
       // Diff 算法核心：判断是否可以复用
-      if (prevChild != null && this._shouldUpdateReactComponent(prevElement, nextElement)) {
+      if (prevChildInstance != null && this._shouldUpdateReactComponent(prevElement, nextElement)) {
         // 情况1：可以复用 → 更新现有组件
-        prevChild.receiveComponent(nextElement)
-        nextChildInstances[key] = prevChild
+        prevChildInstance.receiveComponent(nextElement)
+        nextChildInstances[key] = prevChildInstance
       }
       else {
         // 情况2：不能复用 → 替换组件
-        if (prevChild) {
-          const hostNode = this._getHostNodeFromInstance(prevChild)
+        if (prevChildInstance) {
+          const hostNode = this._getHostNodeFromInstance(prevChildInstance)
           if (hostNode) {
             removedNodes[key] = hostNode
           }
-          prevChild.unmountComponent()
+          prevChildInstance.unmountComponent()
         }
         // 创建新组件
         const nextChildInstance = instantiateReactComponent(nextElement)
@@ -509,15 +511,15 @@ export class DOMComponent implements InternalInstance {
     }
 
     // 情况3：删除不再存在的子组件
-    if (prevChildren) {
-      for (const key in prevChildren) {
+    if (prevChildInstances) {
+      for (const key in prevChildInstances) {
         if (!(key in nextChildInstances)) {
-          const prevChild = prevChildren[key]
-          const hostNode = this._getHostNodeFromInstance(prevChild)
+          const prevChildInstance = prevChildInstances[key]
+          const hostNode = this._getHostNodeFromInstance(prevChildInstance)
           if (hostNode) {
             removedNodes[key] = hostNode
           }
-          prevChild.unmountComponent()
+          prevChildInstance.unmountComponent()
         }
       }
     }
@@ -773,7 +775,7 @@ export class DOMComponent implements InternalInstance {
       return
 
     // 卸载旧的子组件
-    if (this._renderedChildren) {
+    if (this._renderedChildInstances) {
       this._unmountChildren()
     }
 
@@ -781,7 +783,7 @@ export class DOMComponent implements InternalInstance {
     const textInstance = instantiateReactComponent(nextContent)
     const textFragment = textInstance.mountComponent()
     textInstance._mountIndex = 0
-    this._renderedChildren = { '.0': textInstance }
+    this._renderedChildInstances = { '.0': textInstance }
     node.appendChild(textFragment)
   }
 
@@ -789,15 +791,15 @@ export class DOMComponent implements InternalInstance {
    * 卸载所有子组件
    */
   private _unmountChildren(): void {
-    if (!this._renderedChildren)
+    if (!this._renderedChildInstances)
       return
 
-    for (const key in this._renderedChildren) {
-      const child = this._renderedChildren[key]
-      child.unmountComponent()
+    for (const key in this._renderedChildInstances) {
+      const childInstance = this._renderedChildInstances[key]
+      childInstance.unmountComponent()
     }
 
-    this._renderedChildren = null
+    this._renderedChildInstances = null
   }
 
   /**
