@@ -33,7 +33,7 @@ const BOOLEAN_ATTRIBUTES = new Set([
 /**
  * 更新操作类型
  */
-type UpdateType = 'INSERT_MARKUP' | 'MOVE_EXISTING' | 'REMOVE_NODE' | 'SET_MARKUP' | 'TEXT_CONTENT'
+type UpdateType = 'INSERT_MARKUP' | 'MOVE_EXISTING' | 'REMOVE_NODE'
 
 interface Update {
   type: UpdateType
@@ -701,12 +701,6 @@ export class DOMComponent implements InternalInstance {
           break
         case 'REMOVE_NODE':
           this._removeChildNode(node, update.fromNode!)
-          break
-        case 'SET_MARKUP':
-          node.innerHTML = update.content
-          break
-        case 'TEXT_CONTENT':
-          node.textContent = update.content
           break
       }
     }
