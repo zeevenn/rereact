@@ -1,5 +1,11 @@
 # rereact
 
+## 0.1.1
+
+### Patch Changes
+
+- chore: rename package rereact to rereact-core
+
 ## 0.1.0
 
 ### Minor Changes
