@@ -20,7 +20,7 @@ Stack reconciler in v15.
 [npm-downloads-href]: https://npmjs.com/package/rereact-reconciler-stack
 [bundle-src]: https://img.shields.io/bundlephobia/minzip/@zeevenn/rereact-reconciler-stack?style=flat&colorA=080f12&colorB=1fa669&label=minzip
 [bundle-href]: https://bundlephobia.com/result?p=rereact-reconciler-stack
-[license-src]: https://img.shields.io/github/license/zeevenn/rereact/blob/main/packages/rereact-reconciler-stack/LICENSE
-[license-href]: https://github.com/zeevenn/rereact/blob/main/packages/rereact-reconciler-stack/LICENSE
+[license-src]: https://img.shields.io/github/license/zeevenn/rereact
+[license-href]: https://github.com/zeevenn/rereact/blob/main/LICENSE.md
 [jsdocs-src]: https://img.shields.io/badge/jsdocs-reference-080f12?style=flat&colorA=080f12&colorB=1fa669
 [jsdocs-href]: https://www.jsdocs.io/package/rereact-reconciler-stack

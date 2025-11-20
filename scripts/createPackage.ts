@@ -165,8 +165,8 @@ ${description}
 [npm-downloads-href]: https://npmjs.com/package/${name}
 [bundle-src]: https://img.shields.io/bundlephobia/minzip/@${repository?.owner}/${name}?style=flat&colorA=080f12&colorB=1fa669&label=minzip
 [bundle-href]: https://bundlephobia.com/result?p=${name}
-[license-src]: https://img.shields.io/github/license/${repository?.owner}/${repository?.repo}/blob/main/packages/${name}/LICENSE
-[license-href]: https://github.com/${repository?.owner}/${repository?.repo}/blob/main/packages/${name}/LICENSE
+[license-src]: https://img.shields.io/github/license/${repository?.owner}/${repository?.repo}
+[license-href]: https://github.com/${repository?.owner}/${repository?.repo}/blob/main/LICENSE.md
 [jsdocs-src]: https://img.shields.io/badge/jsdocs-reference-080f12?style=flat&colorA=080f12&colorB=1fa669
 [jsdocs-href]: https://www.jsdocs.io/package/${name}
 `
