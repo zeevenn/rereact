@@ -119,7 +119,7 @@ importers:
       react-dom:
         specifier: catalog:example
         version: 19.2.0(react@19.2.0)
-      rereact:
+      rereact-core:
         specifier: workspace:*
         version: link:../packages/rereact
       rereact-reconciler-stack:
@@ -161,7 +161,7 @@ importers:
         specifier: workspace:*
         version: link:../shared
     devDependencies:
-      rereact:
+      rereact-core:
         specifier: workspace:*
         version: link:../rereact
 

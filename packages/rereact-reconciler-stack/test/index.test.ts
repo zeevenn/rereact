@@ -1,4 +1,4 @@
-import { jsx } from 'rereact/jsx-runtime'
+import { jsx } from 'rereact-core/jsx-runtime'
 import { describe, expect, it } from 'vitest'
 import { render } from '../src'
 

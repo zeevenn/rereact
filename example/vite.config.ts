@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
   return {
     // plugins: [react()],
     // 使用 rereact 的 jsx runtime
-    plugins: [react({ jsxImportSource: 'rereact' })],
+    plugins: [react({ jsxImportSource: 'rereact-core' })],
     build: {
       sourcemap: isDev,
     },

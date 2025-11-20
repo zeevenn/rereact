@@ -35,6 +35,6 @@
     "shared": "workspace:*"
   },
   "devDependencies": {
-    "rereact": "workspace:*"
+    "rereact-core": "workspace:*"
   }
 }

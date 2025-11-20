@@ -5,5 +5,5 @@
 ### Patch Changes
 
 - Updated dependencies []:
-  - rereact@0.1.0
+  - rereact-core@0.1.0
   - rereact-reconciler-stack@0.1.0

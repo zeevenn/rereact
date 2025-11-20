@@ -1,5 +1,5 @@
 {
-  "name": "rereact",
+  "name": "rereact-core",
   "type": "module",
   "version": "0.1.0",
   "description": "A tiny React implementation for learning purposes",
