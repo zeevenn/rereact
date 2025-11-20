@@ -3,7 +3,7 @@
   "changelog": [
     "@changesets/changelog-github",
     {
-      "repo": "zeevenn/starter-ts-monorepo"
+      "repo": "zeevenn/rereact"
     }
   ],
   "commit": false,

@@ -1,7 +1,7 @@
 {
   "name": "rereact",
   "type": "module",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "A tiny React implementation for learning purposes",
   "author": "zeevenn <contract@ziven.me>",
   "license": "MIT",
