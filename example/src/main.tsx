@@ -1,16 +1,16 @@
-// import { createRoot } from 'react-dom/client'
-import { render } from 'rereact-reconciler-stack'
-import StackApp from './StackApp.tsx'
+import { createRoot } from 'rereact-dom/client'
+import App from './App.tsx'
+
+// 取消注释，使用 Stack Reconciler 查看效果
+// import { render } from 'rereact-reconciler-stack'
+// import StackApp from './StackApp.tsx'
+
 import './index.css'
-// import { StrictMode } from 'react'
-// import App from './App.tsx'
 
 // Fiber Reconciler
-// createRoot(document.getElementById('root')!).render(
-//   <StrictMode>
-//     <App />
-//   </StrictMode>,
-// )
+createRoot(document.getElementById('root')!).render(
+  <App />,
+)
 
 // Fiber Reconciler - 函数组件示例
 // createRoot(document.getElementById('root')!).render(
@@ -18,9 +18,9 @@ import './index.css'
 // )
 
 // Stack Reconciler
-const container = document.getElementById('root')!
+// const container = document.getElementById('root')!
 
-render(
-  <StackApp />,
-  container,
-)
+// render(
+//   <StackApp />,
+//   container,
+// )

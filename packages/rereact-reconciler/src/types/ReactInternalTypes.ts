@@ -99,3 +99,7 @@ export interface Fiber {
   // workInProgress : Fiber ->  alternate The alternate used for reuse happens
   // to be the same as work in progress.
 }
+
+export interface FiberRoot {
+
+}

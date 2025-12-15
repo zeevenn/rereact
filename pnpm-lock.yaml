@@ -122,6 +122,9 @@ importers:
       rereact-core:
         specifier: workspace:*
         version: link:../packages/rereact
+      rereact-dom:
+        specifier: workspace:*
+        version: link:../packages/rereact-dom
       rereact-reconciler-stack:
         specifier: workspace:*
         version: link:../packages/rereact-reconciler-stack
@@ -151,7 +154,14 @@ importers:
         specifier: workspace:*
         version: link:../shared
 
-  packages/rereact-dom: {}
+  packages/rereact-dom:
+    dependencies:
+      rereact-reconciler:
+        specifier: workspace:*
+        version: link:../rereact-reconciler
+      shared:
+        specifier: workspace:*
+        version: link:../shared
 
   packages/rereact-reconciler:
     dependencies:

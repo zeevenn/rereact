@@ -13,6 +13,7 @@
     "react": "catalog:example",
     "react-dom": "catalog:example",
     "rereact-core": "workspace:*",
+    "rereact-dom": "workspace:*",
     "rereact-reconciler-stack": "workspace:*"
   },
   "devDependencies": {
