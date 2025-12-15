@@ -30,5 +30,8 @@
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "tsdown",
     "start": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "shared": "workspace:*"
   }
 }
