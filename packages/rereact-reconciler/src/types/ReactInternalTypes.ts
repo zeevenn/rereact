@@ -52,10 +52,7 @@ export interface Fiber {
 
   // The ref last used to attach this node.
   // I'll avoid adding an owner field for prod and model that as functions.
-  ref:
-    | null
-    | (((handle: any) => void) & { _stringRef: string | null })
-    | RefObject
+  ref: RefObject | null
 
   refCleanup: null | (() => void)
 
@@ -103,3 +100,8 @@ export interface Fiber {
 export interface FiberRoot {
 
 }
+
+export type Container
+  = | (Element & { _reactRootContainer?: FiberRoot })
+    | (Document & { _reactRootContainer?: FiberRoot })
+    | (DocumentFragment & { _reactRootContainer?: FiberRoot })
