@@ -98,7 +98,8 @@ export interface Fiber {
 }
 
 export interface FiberRoot {
-
+  containerInfo: Container
+  current: Fiber | null
 }
 
 export type Container

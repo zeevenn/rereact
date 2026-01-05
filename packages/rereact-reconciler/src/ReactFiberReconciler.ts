@@ -1,8 +1,8 @@
 import type { ReactNodeList } from 'shared'
-import type { FiberRoot } from './types/ReactInternalTypes'
+import type { Container, FiberRoot } from './types'
 import { createFiberRoot } from './ReactFiberRoot'
 
-export function createContainer(containerInfo: any): any {
+export function createContainer(containerInfo: Container): FiberRoot {
   return createFiberRoot(containerInfo)
 }
 
