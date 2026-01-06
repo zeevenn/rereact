@@ -3,21 +3,19 @@ import { createHostRootFiber } from './ReactFiber'
 
 class FiberRootNode {
   containerInfo: Container
-  current: Fiber | null
+  current: Fiber
 
-  constructor(containerInfo: Container) {
+  constructor(containerInfo: Container, hostRootFiber: Fiber) {
     this.containerInfo = containerInfo
-    this.current = null
+    this.current = hostRootFiber
   }
 }
 
 export function createFiberRoot(containerInfo: Container): FiberRoot {
-  const root: FiberRoot = new FiberRootNode(containerInfo)
-
   // Cyclic construction. This cheats the type system right now because
   // stateNode is any.
   const uninitializedFiber = createHostRootFiber()
-  root.current = uninitializedFiber
+  const root: FiberRoot = new FiberRootNode(containerInfo, uninitializedFiber)
   uninitializedFiber.stateNode = root
 
   return root

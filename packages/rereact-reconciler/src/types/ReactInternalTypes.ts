@@ -99,7 +99,7 @@ export interface Fiber {
 
 export interface FiberRoot {
   containerInfo: Container
-  current: Fiber | null
+  current: Fiber
 }
 
 export type Container
