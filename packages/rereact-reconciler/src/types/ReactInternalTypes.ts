@@ -1,7 +1,13 @@
-import type { RefObject } from 'shared'
+import type { ReactKey, RefObject } from 'shared'
 import type { Flags } from './ReactFiberFlags'
 import type { Lanes } from './ReactFiberLane'
 import type { WorkTag } from './ReactWorkTags'
+
+// TODO: Implement full Dependencies type
+export interface Dependencies {
+  lanes: Lanes
+  firstContext: any
+}
 
 // https://github.com/acdlite/react-fiber-architecture?tab=readme-ov-file#structure-of-a-fiber
 // Fiber 是一个包含组件信息的对象，它对应一个栈帧，但同时也对应一个组件的实例。
@@ -21,7 +27,7 @@ export interface Fiber {
   tag: WorkTag
 
   // Unique identifier of this child.
-  key: string | null
+  key: ReactKey
 
   // The value of element.type which is used to preserve the identity during
   // reconciliation of this child.
@@ -66,9 +72,8 @@ export interface Fiber {
   // The state used to create the output
   memoizedState: any
 
-  // TODO: implement this
   // Dependencies (contexts, events) for this fiber, if it has any
-  // dependencies: Dependencies | null,
+  dependencies: Dependencies | null
 
   // Bitfield that describes properties about the fiber and its subtree. E.g.
   // the ConcurrentMode flag indicates whether the subtree should be async-by-
@@ -76,7 +81,8 @@ export interface Fiber {
   // parent. Additional flags can be set at creation time, but after that the
   // value should remain unchanged throughout the fiber's lifetime, particularly
   // before its child fibers are created.
-  // TODO: implement this
+
+  // don't implement this
   // mode: TypeOfMode,
 
   // Effect
